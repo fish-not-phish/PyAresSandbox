@@ -54,17 +54,22 @@ def handle_projectile_collision(ship, projectile):
         if projectile.explosion_type == 'missile_hit':
             explosion_sprite_sheet = missile_hit_sprite_sheet
             explosion_frames = missile_hit_frames
+            animation_speed = 1.0  
+            duration = 1.0
         else:
             explosion_sprite_sheet = weapon_hit_sprite_sheet
             explosion_frames = weapon_hit_frames
-    
+            animation_speed = 1.0  
+            duration = 0.3
+
     explosion = Explosion(
-            position=projectile.position,
-            sprite_sheet=explosion_sprite_sheet,
-            frames=explosion_frames,
-            size=projectile.size_scale,  # This now works for lasers
-            duration=0.3  # Adjust duration as needed
-        )
+        position=projectile.position,
+        sprite_sheet=explosion_sprite_sheet,
+        frames=explosion_frames,
+        size=projectile.size_scale,
+        duration=duration,           
+        animation_speed=animation_speed  
+    )
     explosions.add(explosion)
 
 def handle_ship_collision(ship1, ship2):
@@ -297,7 +302,10 @@ while running:
                 handle_ship_collision(ship1, ship2)
 
     for projectile in projectiles:
-        projectile.update(delta_time)
+        if isinstance(projectile, HomingMissile):
+            projectile.update(delta_time, ships)
+        else:
+            projectile.update(delta_time)
 
     # Update explosions and particles
     explosions.update(delta_time)

@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size=1.0, mass=0.0, origin_race=None, hit_sound=None, explosion_type='weapon_hit'):
@@ -272,3 +273,79 @@ class AttachedLaser(pygame.sprite.Sprite):
 
         # Blit the scaled image to the surface
         surface.blit(scaled_image, scaled_rect.topleft)
+
+# projectile.py
+
+class HomingMissile(Projectile):
+    def __init__(self, position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size=1.0, mass=0.0, origin_race=None, hit_sound=None, explosion_type='weapon_hit', max_rotation=5):
+        super().__init__(position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size, mass, origin_race, hit_sound, explosion_type)
+        self.is_homing = True
+        self.max_rotation = max_rotation  # Degrees per frame, adjust as needed
+
+    def update(self, delta_time, ships):
+        """Update the missile's position and apply homing behavior."""
+        # Update the elapsed time
+        self.elapsed_time += delta_time
+        if self.elapsed_time > self.lifetime:
+            self.kill()
+            return
+
+        # Homing behavior
+        if self.is_homing:
+            # Find the closest enemy ship
+            min_distance = float('inf')
+            closest_ship = None
+            for ship in ships:
+                if ship.race != self.origin_race:
+                    distance = self.position.distance_to(ship.position)
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_ship = ship
+            if closest_ship:
+                # Calculate the desired direction
+                desired_direction = (closest_ship.position - self.position).normalize()
+                # Calculate the current velocity direction
+                current_direction = self.velocity.normalize()
+                # Calculate the angle between current velocity and desired direction
+                angle_between = current_direction.angle_to(desired_direction)
+                # Limit the rotation angle per frame
+                rotation_angle = min(abs(angle_between), self.max_rotation)
+                # Restore the sign of the angle
+                if angle_between < 0:
+                    rotation_angle = -rotation_angle
+                # Rotate the velocity vector
+                self.velocity = self.velocity.rotate(rotation_angle)
+                # Update the angle for rendering
+                self.angle = -self.velocity.angle_to(pygame.math.Vector2(0, -1))
+        
+        # Update position
+        self.position += self.velocity * delta_time
+        self.rect.center = self.position
+
+        # For missiles, use only the first frame; no animation needed
+        self.load_image()
+
+    def load_image(self):
+        """Load and rotate the missile image based on current angle."""
+        # Use the first frame for missiles
+        frame = self.frames[0]
+
+        # Extract the frame from the sprite sheet
+        sprite_rect = pygame.Rect(frame['left'], frame['top'], frame['right'] - frame['left'], frame['bottom'] - frame['top'])
+        original_image = self.sprite_sheet.subsurface(sprite_rect).copy()
+
+        # Scale the sprite image based on the size scale
+        original_width = sprite_rect.width
+        original_height = sprite_rect.height
+        scaled_width = int(original_width * self.size_scale)
+        scaled_height = int(original_height * self.size_scale)
+        self.image = pygame.transform.smoothscale(original_image, (scaled_width, scaled_height))
+
+        # Rotate the image to match the missile's angle
+        self.image = pygame.transform.rotate(self.image, -self.angle)
+
+        # Update the rect for positioning
+        self.rect = self.image.get_rect(center=self.position)
+
+        # Create a mask for collision detection
+        self.mask = pygame.mask.from_surface(self.image)
