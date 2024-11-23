@@ -1,5 +1,3 @@
-# sound_manager.py
-
 import pygame
 import os
 

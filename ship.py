@@ -7,7 +7,7 @@ from utils import load_weapon_assets
 BASE_ASSETS_PATH = "assets"
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, race, x, y, frames, ship_sheet, screen_width, screen_height, config):
+    def __init__(self, race, x, y, frames, ship_sheet, screen_width, screen_height, config, particles_group):
         super().__init__()
         self.race = race
         self.position = pygame.math.Vector2(x, y)
@@ -21,6 +21,7 @@ class Ship(pygame.sprite.Sprite):
         self.image_idx = 0
         self.size_scale = config.get("size", 1.0)
         self.mass = config.get("mass", 1.0)
+        self.particles_group = particles_group
 
         # Load ship-specific settings
         self.health = config.get("health", 100)
@@ -102,6 +103,13 @@ class Ship(pygame.sprite.Sprite):
         self.update_image()
 
     def draw(self, surface, camera):
+        # Draw weapons (attached lasers)
+        if self.primary_weapon:
+            self.primary_weapon.draw(surface, camera, self)
+        if self.secondary_weapon:
+            self.secondary_weapon.draw(surface, camera, self)
+        if self.special_weapon:
+            self.special_weapon.draw(surface, camera, self)
         # Convert world position to screen position
         screen_position = camera.world_to_screen(self.position)
 
@@ -155,6 +163,26 @@ class Ship(pygame.sprite.Sprite):
                 laser_length=weapon_config.get("laser_length", 100),
                 laser_width=weapon_config.get("laser_width", 5),
             )
+        
+        elif weapon_type == "trazer":
+            return TrazerWeapon(
+                particles_group=self.particles_group,
+                damage=weapon_config.get("damage", 10),
+                fire_rate=weapon_config.get("fire_rate", 0.5),
+                projectile_type=weapon_type,
+                speed=weapon_config.get("speed", 10),
+                lifetime=weapon_config.get("lifetime", 2),
+                size=weapon_config.get("size", 1.0),
+                mass=weapon_config.get("mass", 0.0),
+                sound_manager=sound_manager,
+                fire_sound=weapon_config.get("fire_sound"),
+                hit_sound=weapon_config.get("hit_sound"),
+                explosion_type=weapon_config.get("explosion_type", "weapon_hit"),
+                laser_color=weapon_config.get("laser_color", (255, 0, 0)),
+                laser_length=weapon_config.get("laser_length", 100),
+                laser_width=weapon_config.get("laser_width", 5),
+            )
+        
         else:
             # For other weapon types, load assets normally
             sprite_sheet, frames = load_weapon_assets(BASE_ASSETS_PATH, self.race, weapon_type)
@@ -174,28 +202,29 @@ class Ship(pygame.sprite.Sprite):
                 explosion_type=weapon_config.get("explosion_type", "weapon_hit"),
             )
 
-
-
     def fire_weapon(self, weapon_type, projectiles):
-        """
-        Fire the specified weapon, ensuring the projectile spawns in front of the ship.
-        """
-        # Calculate the offset for the projectile's spawn position
-        offset = pygame.math.Vector2(0, -10).rotate(self.angle)  # 10 pixels in front of the ship
-        spawn_position = self.position + offset
-
         if weapon_type == "primary" and self.primary_weapon:
-            self.primary_weapon.fire(spawn_position, self.angle, projectiles, self.velocity, self.race)
+            if isinstance(self.primary_weapon, TrazerWeapon):
+                self.primary_weapon.fire(self.position, self.angle, projectiles, self.velocity, self.race)
+            else:
+                # Existing firing logic for other weapons
+                spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
+                self.primary_weapon.fire(spawn_position, self.angle, projectiles, self.velocity, self.race)
         elif weapon_type == "secondary" and self.secondary_weapon:
+            spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
             self.secondary_weapon.fire(spawn_position, self.angle, projectiles, self.velocity, self.race)
         elif weapon_type == "special" and self.special_weapon:
+            spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
             self.special_weapon.fire(spawn_position, self.angle, projectiles, self.velocity, self.race)
 
     def update_weapons(self, delta_time):
-        """Update the cooldowns for all weapons."""
+        """Update the cooldowns and states for all weapons."""
         if self.primary_weapon:
             self.primary_weapon.update_cooldown(delta_time)
+            self.primary_weapon.update(delta_time, self)
         if self.secondary_weapon:
             self.secondary_weapon.update_cooldown(delta_time)
+            self.secondary_weapon.update(delta_time, self)
         if self.special_weapon:
             self.special_weapon.update_cooldown(delta_time)
+            self.special_weapon.update(delta_time, self)

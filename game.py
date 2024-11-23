@@ -10,6 +10,33 @@ from sound_manager import SoundManager
 import os
 from explosion import Explosion
 from projectile import *
+from weapon import *
+from particle import Particle
+
+# Particle group
+particles = pygame.sprite.Group()
+
+def handle_attached_laser_collision(ship, laser, collision_position):
+    global delta_time
+    # Apply damage to the ship
+    ship.health -= laser.damage * delta_time  # Damage over time
+
+    # Spawn particles at the collision point if cooldown allows
+    if laser.particle_spawn_cooldown <= 0:
+        spawn_particles(collision_position)
+        laser.particle_spawn_cooldown = 0.2
+
+def spawn_particles(collision_position):
+    # Spawn particles at the point of collision
+    num_particles = random.randint(1, 2)  # Adjust as needed
+    for _ in range(num_particles):
+        particle = Particle(
+            position=collision_position,
+            velocity=pygame.math.Vector2(random.uniform(-2, 2), random.uniform(-2, 2)),
+            lifetime=random.uniform(0.5, 1.0),
+            color=(random.randint(200, 255), random.randint(0, 50), random.randint(0, 50))
+        )
+        particles.add(particle)
 
 def handle_projectile_collision(ship, projectile):
     # Apply damage to the ship
@@ -30,16 +57,15 @@ def handle_projectile_collision(ship, projectile):
         else:
             explosion_sprite_sheet = weapon_hit_sprite_sheet
             explosion_frames = weapon_hit_frames
-
-        # Create an explosion at the collision point
-        explosion = Explosion(
+    
+    explosion = Explosion(
             position=projectile.position,
             sprite_sheet=explosion_sprite_sheet,
             frames=explosion_frames,
             size=projectile.size_scale,  # This now works for lasers
             duration=0.3  # Adjust duration as needed
         )
-        explosions.add(explosion)
+    explosions.add(explosion)
 
 def handle_ship_collision(ship1, ship2):
     # Calculate the normal vector between the ships
@@ -199,6 +225,7 @@ for ship_config in current_level.ships:
         screen_width=SCREEN_WIDTH,
         screen_height=SCREEN_HEIGHT,
         config=ship_config,  # Pass the entire ship configuration
+        particles_group=particles,
     )
     ships.append(ship)
 
@@ -243,6 +270,10 @@ while running:
             player_ship.decelerate()
         if keys[K_SPACE]:  # Primary weapon
             ships[0].fire_weapon("primary", projectiles)
+        else:
+            # Stop firing if the key is not pressed
+            if isinstance(player_ship.primary_weapon, TrazerWeapon):
+                player_ship.primary_weapon.stop_firing()
         if keys[K_LSHIFT]:  # Secondary weapon
             ships[0].fire_weapon("secondary", projectiles)
         if keys[K_c]:  # Special weapon
@@ -268,14 +299,29 @@ while running:
     for projectile in projectiles:
         projectile.update(delta_time)
 
-    # Update explosions
+    # Update explosions and particles
     explosions.update(delta_time)
+    particles.update(delta_time)
 
     # Check for projectile-ship collisions
     for ship in ships:
         for projectile in projectiles:
             if projectile.origin_race != ship.race and check_projectile_collision(ship, projectile):
                 handle_projectile_collision(ship, projectile)
+
+    # Check for attached laser-ship collisions
+    for ship in ships:
+        for other_ship in ships:
+            if ship != other_ship:
+                if isinstance(ship.primary_weapon, TrazerWeapon):
+                    for laser in ship.primary_weapon.attached_lasers:
+                        if laser.origin_race != other_ship.race:
+                            # Swap parameters to get offset in laser's coordinate space
+                            offset = pygame.sprite.collide_mask(laser, other_ship)
+                            if offset:
+                                # Calculate collision position in the laser's coordinate space
+                                collision_position = laser.rect.topleft + pygame.math.Vector2(offset)
+                                handle_attached_laser_collision(other_ship, laser, collision_position)
 
     # Handle ships with zero or negative health
     for ship in ships[:]:
@@ -308,6 +354,8 @@ while running:
         projectile.draw(screen, camera)
     for explosion in explosions:
         explosion.draw(screen, camera)
+    for particle in particles:
+        particle.draw(screen, camera)
 
     # Flip the display
     pygame.display.flip()

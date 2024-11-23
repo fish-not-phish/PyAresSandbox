@@ -1,5 +1,7 @@
 import os
 import pygame
+from particle import Particle
+import random
 
 def load_ship_assets(base_path, race, ship_type):
     """
@@ -56,3 +58,15 @@ def load_explosion_assets(base_path, explosion_type):
     frames = parse_pn_file(frame_path)
 
     return sprite_sheet, frames
+
+def spawn_particles(position, particles_group):
+    # Spawn particles at the specified position
+    num_particles = random.randint(1, 2)  # Adjust as needed
+    for _ in range(num_particles):
+        particle = Particle(
+            position=position,
+            velocity=pygame.math.Vector2(random.uniform(-2, 2), random.uniform(-2, 2)),
+            lifetime=random.uniform(0.5, 1.0),
+            color=(random.randint(200, 255), random.randint(0, 50), random.randint(0, 50))
+        )
+        particles_group.add(particle)

@@ -193,3 +193,78 @@ class Laser(pygame.sprite.Sprite):
 
         # Blit the scaled image to the surface
         surface.blit(scaled_image, scaled_rect.topleft)
+
+class AttachedLaser(pygame.sprite.Sprite):
+    def __init__(self, offset_angle, distance, laser_angle, length, width, color, damage, lifetime, ship, origin_race):
+        super().__init__()
+        self.offset_angle = offset_angle
+        self.distance = distance
+        self.laser_angle = laser_angle
+        self.length = length
+        self.width = width
+        self.color = color
+        self.damage = damage
+        self.lifetime = lifetime
+        self.elapsed_time = 0
+        self.ship = ship
+        self.origin_race = origin_race
+        self.particle_spawn_cooldown = 0.0
+
+        # Create a surface for collision detection
+        self.image = pygame.Surface((self.width, self.length), pygame.SRCALPHA)
+        pygame.draw.rect(self.image, self.color, (0, 0, self.width, self.length))
+        self.original_image = self.image.copy()
+
+        self.update_position()
+
+
+    def get_start_position(self):
+        """Calculate the start position of the laser."""
+        # The start position is where the laser leaves the ship
+        offset = pygame.math.Vector2(0, -self.distance).rotate(self.ship.angle + self.offset_angle)
+        start_position = self.ship.position + offset
+        return start_position
+
+    def update_position(self):
+        # Calculate the laser's world start position
+        offset = pygame.math.Vector2(0, -self.distance).rotate(self.ship.angle + self.offset_angle)
+        self.position = self.ship.position + offset
+
+        # Rotate the image
+        total_angle = self.ship.angle + self.laser_angle
+        self.image = pygame.transform.rotate(self.original_image, -total_angle)
+        self.rect = self.image.get_rect(center=self.position)
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def update(self, delta_time):
+        self.elapsed_time += delta_time
+        if self.elapsed_time >= self.lifetime:
+            self.kill()
+            return
+
+        # Update position and rotation
+        self.update_position()
+
+        # Update particle spawn cooldown
+        if self.particle_spawn_cooldown > 0:
+            self.particle_spawn_cooldown -= delta_time
+
+    def draw(self, surface, camera):
+        # Update position and rotation before drawing
+        self.update_position()
+
+        # Draw the laser
+        screen_position = camera.world_to_screen(self.position)
+
+        # Scale the image based on the camera's zoom level
+        scaled_image = pygame.transform.smoothscale(
+            self.image,
+            (
+                int(self.rect.width * camera.zoom_level),
+                int(self.rect.height * camera.zoom_level),
+            )
+        )
+        scaled_rect = scaled_image.get_rect(center=(int(screen_position.x), int(screen_position.y)))
+
+        # Blit the scaled image to the surface
+        surface.blit(scaled_image, scaled_rect.topleft)

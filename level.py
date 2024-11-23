@@ -22,7 +22,7 @@ class Level:
         LEVEL_DATA = {
             1: {
                 "aud": [
-                    {"type": "cruiser", "x": 200, "y": 150}, 
+                    {"type": "carrier", "x": 200, "y": 150}, 
                     {"type": "cruiser", "x": 500, "y": 150},
                     {"type": "carrier", "x": 100, "y": 150},
                     {"type": "gunship", "x": 250, "y": 150},

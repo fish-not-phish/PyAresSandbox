@@ -9,14 +9,13 @@
     "friction": 0.05,
     "weapons": {
         "primary": {
-            "type": "inasa",
-            "speed": 400,
-            "lifetime": 2,
-            "size": 0.7,
+            "type": "trazer",
             "damage": 50,
-            "fire_rate": 0.2,
-            "mass": 0.0,
-            "fire_sound": "inasa_fire",
+            "fire_rate": 0.1,
+            "size": 1.0,
+            "laser_color": [191, 94, 38],
+            "laser_width": 1,
+            "fire_sound": "trazer_fire",
             "hit_sound": "basic_weapon_hit",
             "explosion_type": "weapon_hit"
         },
