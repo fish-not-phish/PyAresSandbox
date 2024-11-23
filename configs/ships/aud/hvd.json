@@ -1,0 +1,50 @@
+{
+    "type": "hvd",
+    "size": 1.0,
+    "mass": 1.45,
+    "health": 2000,
+    "top_speed": 210,
+    "acceleration": 3.08,
+    "rotation_speed": 2.0,
+    "friction": 0.05,
+    "weapons": {
+        "primary": {
+            "type": "cform",
+            "speed": 400,
+            "lifetime": 2,
+            "size": 0.7,
+            "damage": 200,
+            "fire_rate": 0.2,
+            "mass": 0.0,
+            "fire_sound": "cform_fire",
+            "hit_sound": "basic_weapon_hit",
+            "explosion_type": "weapon_hit"
+        },
+        "secondary": {
+            "type": "laser",
+            "speed": 400,
+            "lifetime": 2,
+            "size": 1.0,
+            "damage": 80,
+            "fire_rate": 0.35,
+            "laser_color": [191, 94, 38],
+            "laser_length": 20,
+            "laser_width": 1,
+            "fire_sound": "asb_fire",
+            "hit_sound": "basic_weapon_hit",
+            "explosion_type": "weapon_hit"
+        },
+        "special": {
+            "type": "amissile",
+            "speed": 400,
+            "lifetime": 2,
+            "size": 0.7,
+            "damage": 200,
+            "fire_rate": 0.2,
+            "mass": 0.0,
+            "fire_sound": "onas_fire",
+            "hit_sound": "basic_weapon_hit",
+            "explosion_type": "weapon_hit"
+        }
+    }
+}

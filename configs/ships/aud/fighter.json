@@ -1,0 +1,28 @@
+{
+    "type": "fighter",
+    "size": 1.0,
+    "mass": 0.8,
+    "health": 600,
+    "top_speed": 280,
+    "acceleration": 3.8,
+    "rotation_speed": 3.0,
+    "friction": 0.05,
+    "weapons": {
+        "primary": {
+            "type": "laser",
+            "speed": 400,
+            "lifetime": 2,
+            "size": 1.0,
+            "damage": 80,
+            "fire_rate": 0.35,
+            "laser_color": [191, 94, 38],
+            "laser_length": 20,
+            "laser_width": 1,
+            "fire_sound": "asb_fire",
+            "hit_sound": "basic_weapon_hit",
+            "explosion_type": "weapon_hit"
+        },
+        "secondary": null,
+        "special": null
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "type": "transport",
+    "size": 1.0,
+    "mass": 1.1,
+    "health": 250,
+    "top_speed": 140,
+    "acceleration": 6,
+    "rotation_speed": 2,
+    "friction": 0.05,
+    "weapons": {
+        "primary": null,
+        "secondary": null,
+        "special": null
+    }
+}

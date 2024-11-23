@@ -1,0 +1,39 @@
+{
+    "type": "fighter",
+    "size": 1.0,
+    "mass": 0.8,
+    "health": 100,
+    "top_speed": 280,
+    "acceleration": 1.54,
+    "rotation_speed": 3.0,
+    "friction": 0.05,
+    "weapons": {
+        "primary": {
+            "type": "onas",
+            "speed": 400,
+            "lifetime": 2,
+            "size": 0.7,
+            "damage": 50,
+            "fire_rate": 0.2,
+            "mass": 0.0,
+            "fire_sound": "onas_fire",
+            "hit_sound": "basic_weapon_hit",
+            "explosion_type": "weapon_hit"
+        },
+        "secondary": {
+            "type": "laser",
+            "speed": 400,
+            "lifetime": 2,
+            "size": 1.0,
+            "damage": 10,
+            "fire_rate": 0.35,
+            "laser_color": [125, 32, 145],
+            "laser_length": 20,
+            "laser_width": 1,
+            "fire_sound": "ele_laser_fire",
+            "hit_sound": "basic_weapon_hit",
+            "explosion_type": "weapon_hit"
+        },
+        "special": null
+    }
+}
