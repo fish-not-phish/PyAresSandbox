@@ -38,13 +38,15 @@
             "type": "amissile",
             "speed": 400,
             "lifetime": 2,
-            "size": 0.7,
+            "size": 1.0,
             "damage": 200,
-            "fire_rate": 0.2,
-            "mass": 0.0,
-            "fire_sound": "onas_fire",
-            "hit_sound": "basic_weapon_hit",
-            "explosion_type": "weapon_hit"
+            "fire_rate": 1.7,
+            "laser_color": [125, 32, 145],
+            "laser_length": 20,
+            "laser_width": 1,
+            "fire_sound": "amissile_fire",
+            "hit_sound": "missile_weapon_hit",
+            "explosion_type": "missile_hit"
         }
     }
 }

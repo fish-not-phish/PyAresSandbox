@@ -14,7 +14,7 @@
             "lifetime": 2,
             "size": 1.0,
             "damage": 80,
-            "fire_rate": 0.35,
+            "fire_rate": 1,
             "laser_color": [191, 94, 38],
             "laser_length": 20,
             "laser_width": 1,

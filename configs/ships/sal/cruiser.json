@@ -9,14 +9,14 @@
     "friction": 0.05,
     "weapons": {
         "primary": {
-            "type": "onas",
+            "type": "anti",
             "speed": 400,
             "lifetime": 2,
             "size": 0.7,
             "damage": 50,
             "fire_rate": 0.2,
             "mass": 0.0,
-            "fire_sound": "onas_fire",
+            "fire_sound": "anti_fire",
             "hit_sound": "basic_weapon_hit",
             "explosion_type": "weapon_hit"
         },
@@ -27,10 +27,10 @@
             "size": 1.0,
             "damage": 10,
             "fire_rate": 0.35,
-            "laser_color": [125, 32, 145],
+            "laser_color": [212, 111, 23],
             "laser_length": 20,
             "laser_width": 1,
-            "fire_sound": "ele_laser_fire",
+            "fire_sound": "sal_laser_fire",
             "hit_sound": "basic_weapon_hit",
             "explosion_type": "weapon_hit"
         },

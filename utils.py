@@ -3,6 +3,10 @@ import pygame
 from particle import Particle
 import random
 
+RACE_COLORS = {
+    "can": (245, 38, 2),  # Green for "can"
+}
+
 def load_ship_assets(base_path, race, ship_type):
     """
     Load the sprite sheet and frame data for a specific race and ship type.
@@ -18,16 +22,16 @@ def load_ship_assets(base_path, race, ship_type):
     return sprite_sheet, frames
 
 def load_weapon_assets(base_path, race, weapon_type):
-    """
-    Load the sprite sheet and frame data for a weapon.
-    """
     sprite_path = os.path.join(base_path, race, "weapons", f"{weapon_type}.png")
     frame_path = os.path.join(base_path, race, "weapons", f"{weapon_type}.pn")
-    
-    # Load sprite sheet and frames
+
+    print(f"Loading weapon assets for race: {race}, weapon type: {weapon_type}")
     sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
+
+    if weapon_type == "anti" and race in RACE_COLORS:
+        sprite_sheet = recolor_surface(sprite_sheet, RACE_COLORS.get(race, (255, 255, 255)))
+
     frames = parse_pn_file(frame_path)
-    
     return sprite_sheet, frames
 
 def parse_pn_file(filename):
@@ -61,7 +65,7 @@ def load_explosion_assets(base_path, explosion_type):
 
 def spawn_particles(position, particles_group):
     # Spawn particles at the specified position
-    num_particles = random.randint(1, 2)  # Adjust as needed
+    num_particles = random.randint(1, 2)
     for _ in range(num_particles):
         particle = Particle(
             position=position,
@@ -70,3 +74,11 @@ def spawn_particles(position, particles_group):
             color=(random.randint(200, 255), random.randint(0, 50), random.randint(0, 50))
         )
         particles_group.add(particle)
+
+def recolor_surface(surface, color):
+    recolored_surface = pygame.Surface(surface.get_size(), flags=pygame.SRCALPHA)
+    recolored_surface.fill(color)  # Fill with the desired color
+    # Use the alpha channel from the original surface
+    recolored_surface.blit(surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    return recolored_surface
+
