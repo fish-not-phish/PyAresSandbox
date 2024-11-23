@@ -199,7 +199,7 @@ class AttachedLaser(pygame.sprite.Sprite):
         super().__init__()
         self.offset_angle = offset_angle
         self.distance = distance
-        self.laser_angle = laser_angle
+        self.laser_angle = laser_angle 
         self.length = length
         self.width = width
         self.color = color
@@ -209,6 +209,11 @@ class AttachedLaser(pygame.sprite.Sprite):
         self.ship = ship
         self.origin_race = origin_race
         self.particle_spawn_cooldown = 0.0
+
+        # Calculate initial offset vector without ship's angle
+        self.initial_offset = pygame.math.Vector2(0, -self.distance).rotate(self.offset_angle)
+        # Store the laser's initial angle (world angle)
+        self.laser_angle = laser_angle  # Already set
 
         # Create a surface for collision detection
         self.image = pygame.Surface((self.width, self.length), pygame.SRCALPHA)
@@ -226,15 +231,14 @@ class AttachedLaser(pygame.sprite.Sprite):
         return start_position
 
     def update_position(self):
-        # Calculate the laser's world start position
-        offset = pygame.math.Vector2(0, -self.distance).rotate(self.ship.angle + self.offset_angle)
-        self.position = self.ship.position + offset
+        # Update the laser's position without considering the ship's rotation
+        self.position = self.ship.position + self.initial_offset
 
-        # Rotate the image
-        total_angle = self.ship.angle + self.laser_angle
-        self.image = pygame.transform.rotate(self.original_image, -total_angle)
+        # Rotate the image only by the laser's own angle (constant)
+        self.image = pygame.transform.rotate(self.original_image, -self.laser_angle)
         self.rect = self.image.get_rect(center=self.position)
         self.mask = pygame.mask.from_surface(self.image)
+
 
     def update(self, delta_time):
         self.elapsed_time += delta_time

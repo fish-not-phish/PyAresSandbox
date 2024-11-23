@@ -10,10 +10,10 @@
     "weapons": {
         "primary": {
             "type": "trazer",
-            "damage": 50,
+            "damage": 30,
             "fire_rate": 0.1,
             "size": 1.0,
-            "laser_color": [191, 94, 38],
+            "laser_color": [165, 78, 186],
             "laser_width": 1,
             "fire_sound": "trazer_fire",
             "hit_sound": "basic_weapon_hit",

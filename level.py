@@ -1,5 +1,5 @@
 import os
-import json  # Use yaml if you prefer YAML
+import json
 
 class Level:
     def __init__(self, level_number):

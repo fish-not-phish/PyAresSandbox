@@ -159,9 +159,9 @@ class TrazerWeapon(Weapon):
         laser_length = random.uniform(min_length, max_length)
 
         attached_laser = AttachedLaser(
-            offset_angle=laser_angle,
+            offset_angle=laser_angle,  # World angle
             distance=distance,
-            laser_angle=laser_angle,
+            laser_angle=laser_angle,   # World angle
             length=laser_length,
             width=self.laser_width,
             color=self.laser_color,
