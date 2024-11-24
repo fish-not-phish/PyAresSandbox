@@ -67,7 +67,7 @@ class Weapon:
                     origin_race=origin_race,
                     hit_sound=self.hit_sound,
                     explosion_type=self.explosion_type,
-                    max_rotation=0.6  # Degrees per frame; adjust as needed
+                    max_rotation=0.6  # Degrees per frame; 
                 )
                 projectiles.add(missile)
 

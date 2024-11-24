@@ -25,7 +25,6 @@ def load_weapon_assets(base_path, race, weapon_type):
     sprite_path = os.path.join(base_path, race, "weapons", f"{weapon_type}.png")
     frame_path = os.path.join(base_path, race, "weapons", f"{weapon_type}.pn")
 
-    print(f"Loading weapon assets for race: {race}, weapon type: {weapon_type}")
     sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
 
     if weapon_type == "anti" and race in RACE_COLORS:

@@ -21,11 +21,11 @@ class Level:
     def load_level_data(self):
         LEVEL_DATA = {
             1: {
-                "sal": [
-                    {"type": "cruiser", "x": 200, "y": 150}, 
+                "aud": [
+                    {"type": "carrier", "x": 200, "y": 150},
                 ],
                 "ish": [
-                    {"type": "carrier", "x": 400, "y": 300},
+                    {"type": "hvd", "x": 400, "y": 300},
                 ],
             },
             2: {
