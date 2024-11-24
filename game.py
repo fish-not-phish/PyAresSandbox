@@ -76,6 +76,11 @@ def handle_projectile_collision(ship, projectile):
                 explosion_frames = missile_hit_frames
                 animation_speed = 1.0  
                 duration = 1.0
+            elif projectile.explosion_type == 'large_hit':
+                explosion_sprite_sheet = large_hit_sprite_sheet
+                explosion_frames = large_hit_frames
+                animation_speed = 1.0  
+                duration = 1.0
             else:
                 explosion_sprite_sheet = weapon_hit_sprite_sheet
                 explosion_frames = weapon_hit_frames
@@ -186,6 +191,7 @@ BASE_ASSETS_PATH = "assets"
 # Load explosion assets
 weapon_hit_sprite_sheet, weapon_hit_frames = load_explosion_assets(BASE_ASSETS_PATH, 'weapon_hit_explosion')
 missile_hit_sprite_sheet, missile_hit_frames = load_explosion_assets(BASE_ASSETS_PATH, 'missile_hit_explosion')
+large_hit_sprite_sheet, large_hit_frames = load_explosion_assets(BASE_ASSETS_PATH, 'large_hit_explosion')
 ship_explosion_sprite_sheet, ship_explosion_frames = load_explosion_assets(BASE_ASSETS_PATH, 'ship_explosion')
 
 # Load sounds

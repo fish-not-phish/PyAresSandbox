@@ -20,7 +20,7 @@
             "laser_width": 1,
             "fire_sound": "atomic_fire",
             "hit_sound": "atomic_weapon_hit",
-            "explosion_type": "missile_hit",
+            "explosion_type": "large_hit",
             "turret": true,
             "turret_projectiles": 1,    
             "turret_spread": 0
