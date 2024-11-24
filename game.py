@@ -229,6 +229,7 @@ for ship_config in current_level.ships:
     race = ship_config["race"]
     ship_type = ship_config["type"]
     weapon_data = ship_config["weapons"]
+    relationship = ship_config["relationship"]
 
     # Load ship assets
     sprite_sheet, frames = load_ship_assets(BASE_ASSETS_PATH, race, ship_type)
@@ -243,6 +244,7 @@ for ship_config in current_level.ships:
     # Create the ship
     ship = Ship(
         race=race,
+        relationship=relationship,
         x=x,
         y=y,
         frames=frames,
@@ -293,22 +295,35 @@ while running:
             player_ship.accelerate()
         if keys[K_DOWN]:
             player_ship.decelerate()
-        if keys[K_SPACE]:  # Primary weapon
-            closest_enemy = find_closest_enemy(player_ship, ships)
-            if closest_enemy:
-                direction = closest_enemy.position - player_ship.position
-                firing_angle = pygame.math.Vector2(0, -1).angle_to(direction)
+        weapon_slots = {
+            "primary": K_SPACE,
+            "secondary": K_LSHIFT,
+            "special": K_c,
+        }
+
+        # Handle firing for each weapon slot
+        for weapon_type, key in weapon_slots.items():
+            if keys[key]:
+                weapon = getattr(player_ship, f"{weapon_type}_weapon", None)
+                if weapon:
+                    if weapon.turret:
+                        # Turret is enabled; aim towards the closest enemy
+                        closest_enemy = find_closest_enemy(player_ship, ships)
+                        if closest_enemy:
+                            direction = closest_enemy.position - player_ship.position
+                            firing_angle = pygame.math.Vector2(0, -1).angle_to(direction)
+                        else:
+                            # No enemies; fire straight ahead
+                            firing_angle = player_ship.angle
+                    else:
+                        # Turret is disabled; always fire straight ahead
+                        firing_angle = player_ship.angle
+                    player_ship.fire_weapon(weapon_type, projectiles, firing_angle)
             else:
-                firing_angle = player_ship.angle  # Default to current angle
-            player_ship.fire_weapon("primary", projectiles, firing_angle)
-        else:
-            # Stop firing if the key is not pressed
-            if isinstance(player_ship.primary_weapon, TrazerWeapon):
-                player_ship.primary_weapon.stop_firing()
-        if keys[K_LSHIFT]:  # Secondary weapon
-            ships[0].fire_weapon("secondary", projectiles)
-        if keys[K_c]:  # Special weapon
-            ships[0].fire_weapon("special", projectiles)
+                # Stop firing if the key is not pressed and the weapon supports continuous firing
+                weapon = getattr(player_ship, f"{weapon_type}_weapon", None)
+                if isinstance(weapon, TrazerWeapon):
+                    weapon.stop_firing()
         
     # Update camera position to follow the player ship
     if ships:
@@ -340,22 +355,25 @@ while running:
     # Check for projectile-ship collisions
     for ship in ships:
         for projectile in projectiles:
-            if projectile.origin_race != ship.race and check_projectile_collision(ship, projectile):
+            # if projectile.origin_race != ship.race and check_projectile_collision(ship, projectile):
+            if projectile.origin_relationship != ship.relationship and check_projectile_collision(ship, projectile):
                 handle_projectile_collision(ship, projectile)
 
     # Check for attached laser-ship collisions
     for ship in ships:
         for other_ship in ships:
             if ship != other_ship:
-                if isinstance(ship.primary_weapon, TrazerWeapon):
-                    for laser in ship.primary_weapon.attached_lasers:
-                        if laser.origin_race != other_ship.race:
-                            # Swap parameters to get offset in laser's coordinate space
-                            offset = pygame.sprite.collide_mask(laser, other_ship)
-                            if offset:
-                                # Calculate collision position in the laser's coordinate space
-                                collision_position = laser.rect.topleft + pygame.math.Vector2(offset)
-                                handle_attached_laser_collision(other_ship, laser, collision_position)
+                for weapon_slot in ['primary_weapon', 'secondary_weapon', 'special_weapon']:
+                    weapon = getattr(ship, weapon_slot, None)
+                    if isinstance(weapon, TrazerWeapon):
+                        for laser in weapon.attached_lasers:
+                            if laser.origin_relationship != ship.relationship:
+                                # Swap parameters to get offset in laser's coordinate space
+                                offset = pygame.sprite.collide_mask(laser, other_ship)
+                                if offset:
+                                    # Calculate collision position in the laser's coordinate space
+                                    collision_position = laser.rect.topleft + pygame.math.Vector2(offset)
+                                    handle_attached_laser_collision(other_ship, laser, collision_position)
 
     # Handle ships with zero or negative health
     for ship in ships[:]:

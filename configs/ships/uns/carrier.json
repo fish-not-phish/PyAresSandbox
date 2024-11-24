@@ -14,12 +14,16 @@
             "lifetime": 2,
             "size": 0.7,
             "damage": 50,
-            "fire_rate": 0.2,
+            "fire_rate": 0.1,
             "mass": 0.0,
             "fire_sound": "magneto_fire",
             "hit_sound": "basic_weapon_hit",
             "explosion_type": "weapon_hit",
-            "turret": true
+            "alternate_fire": true,             
+            "alternate_offset": 5,
+            "turret": false,
+            "turret_projectiles": 1,     
+            "turret_spread": 0
         },
         "secondary": {
             "type": "laser",
@@ -27,14 +31,16 @@
             "lifetime": 2,
             "size": 1.0,
             "damage": 10,
-            "fire_rate": 0.35,
-            "laser_color": [125, 32, 145],
+            "fire_rate": 0.2,
+            "laser_color": [226, 237, 7],
             "laser_length": 20,
             "laser_width": 1,
-            "fire_sound": "ele_laser_fire",
+            "fire_sound": "uns_laser_fire",
             "hit_sound": "basic_weapon_hit",
             "explosion_type": "weapon_hit",
-            "turret": true
+            "turret": true,
+            "turret_projectiles": 1,    
+            "turret_spread": 0
         },
         "special": null
     }

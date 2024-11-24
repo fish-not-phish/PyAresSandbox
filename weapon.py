@@ -48,19 +48,19 @@ class Weapon:
                 adjusted_position = position
 
             if self.turret:
-                # Calculate spread angles
-                total_spread = self.turret_spread  # Total spread angle
-                num_projectiles = self.turret_projectiles
-                if num_projectiles > 1:
+                if self.turret_projectiles > 1:
+                    # Fire multiple projectiles with spread
+                    total_spread = self.turret_spread
+                    num_projectiles = self.turret_projectiles
                     start_angle = angle - (total_spread / 2)
-                    angle_increment = total_spread / (num_projectiles - 1)
-                else:
-                    start_angle = angle
-                    angle_increment = 0
+                    angle_increment = total_spread / (num_projectiles - 1) if num_projectiles > 1 else 0
 
-                for i in range(num_projectiles):
-                    current_angle = start_angle + (i * angle_increment)
-                    self._create_projectile(adjusted_position, current_angle, projectiles, ship_velocity, origin_race, origin_relationship)
+                    for i in range(num_projectiles):
+                        current_angle = start_angle + (i * angle_increment)
+                        self._create_projectile(adjusted_position, current_angle, projectiles, ship_velocity, origin_race, origin_relationship)
+                else:
+                    # Turret enabled but single projectile
+                    self._create_projectile(adjusted_position, angle, projectiles, ship_velocity, origin_race, origin_relationship)
             else:
                 self._create_projectile(adjusted_position, angle, projectiles, ship_velocity, origin_race, origin_relationship)
 

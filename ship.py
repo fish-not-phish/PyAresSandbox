@@ -7,9 +7,10 @@ from utils import load_weapon_assets
 BASE_ASSETS_PATH = "assets"
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, race, x, y, frames, ship_sheet, screen_width, screen_height, config, particles_group):
+    def __init__(self, race, x, y, frames, ship_sheet, screen_width, screen_height, config, particles_group, relationship):
         super().__init__()
         self.race = race
+        self.relationship = relationship
         self.position = pygame.math.Vector2(x, y)
         self.velocity = pygame.math.Vector2(0, 0)
         self.angle = 0
@@ -164,8 +165,6 @@ class Ship(pygame.sprite.Sprite):
                 return None
 
             # Define alternate offsets (left and right relative to the ship)
-            # Example: Left offset at (-15, 0), Right offset at (15, 0)
-            # Adjust the values based on your ship's dimensions and desired firing positions
             alternate_offsets = [
                 pygame.math.Vector2(-weapon_config.get("alternate_offset", 10), 0),
                 pygame.math.Vector2(weapon_config.get("alternate_offset", 10), 0)
@@ -295,20 +294,22 @@ class Ship(pygame.sprite.Sprite):
                     self.relationship  # Pass the relationship
                 )
         elif weapon_type == "secondary" and self.secondary_weapon:
-            spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
+            firing_angle = target_angle if target_angle is not None else self.angle
+            spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(firing_angle)
             self.secondary_weapon.fire(
                 spawn_position, 
-                self.angle, 
+                firing_angle, 
                 projectiles, 
                 self.velocity, 
                 self.race, 
                 self.relationship  # Pass the relationship
             )
         elif weapon_type == "special" and self.special_weapon:
-            spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
+            firing_angle = target_angle if target_angle is not None else self.angle
+            spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(firing_angle)
             self.special_weapon.fire(
                 spawn_position, 
-                self.angle, 
+                firing_angle, 
                 projectiles, 
                 self.velocity, 
                 self.race, 
