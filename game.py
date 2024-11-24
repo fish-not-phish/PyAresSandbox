@@ -12,9 +12,21 @@ from explosion import Explosion
 from projectile import *
 from weapon import *
 from particle import Particle
+import random
 
 # Particle group
 particles = pygame.sprite.Group()
+
+def find_closest_enemy(ship, ships):
+    min_distance = float('inf')
+    closest_ship = None
+    for other_ship in ships:
+        if other_ship != ship and other_ship.relationship != ship.relationship:
+            distance = ship.position.distance_to(other_ship.position)
+            if distance < min_distance:
+                min_distance = distance
+                closest_ship = other_ship
+    return closest_ship
 
 def handle_attached_laser_collision(ship, laser, collision_position):
     global delta_time
@@ -282,7 +294,13 @@ while running:
         if keys[K_DOWN]:
             player_ship.decelerate()
         if keys[K_SPACE]:  # Primary weapon
-            ships[0].fire_weapon("primary", projectiles)
+            closest_enemy = find_closest_enemy(player_ship, ships)
+            if closest_enemy:
+                direction = closest_enemy.position - player_ship.position
+                firing_angle = pygame.math.Vector2(0, -1).angle_to(direction)
+            else:
+                firing_angle = player_ship.angle  # Default to current angle
+            player_ship.fire_weapon("primary", projectiles, firing_angle)
         else:
             # Stop firing if the key is not pressed
             if isinstance(player_ship.primary_weapon, TrazerWeapon):

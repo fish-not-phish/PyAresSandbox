@@ -28,7 +28,7 @@ class Level:
                     ]
                 },
                 "ish": {
-                    "relationship": "friend",
+                    "relationship": "foe",
                     "ships": [
                         {"type": "hvd", "x": 400, "y": 300},
                     ]

@@ -3,7 +3,7 @@ import pygame
 import random
 
 class Weapon:
-    def __init__(self, damage, fire_rate, projectile_type, sprite_sheet=None, pn_file=None, speed=10, lifetime=2, is_special=False, size=1.0, mass=0.0, sound_manager=None, fire_sound=None, hit_sound=None, explosion_type='weapon_hit', laser_color=(255, 0, 0), laser_length=100, laser_width=5, alternate_fire=False, alternate_offsets=None):
+    def __init__(self, damage, fire_rate, projectile_type, sprite_sheet=None, pn_file=None, speed=10, lifetime=2, is_special=False, size=1.0, mass=0.0, sound_manager=None, fire_sound=None, hit_sound=None, explosion_type='weapon_hit', laser_color=(255, 0, 0), laser_length=100, laser_width=5, alternate_fire=False, alternate_offsets=None, turret=False, turret_projectiles=1, turret_spread=15,):
         self.damage = damage
         self.fire_rate = fire_rate
         self.projectile_type = projectile_type
@@ -33,90 +33,36 @@ class Weapon:
             self.alternate_offsets = alternate_offsets
         self.current_offset_idx = 0 
 
+        # Turret properties
+        self.turret = turret
+        self.turret_projectiles = turret_projectiles
+        self.turret_spread = turret_spread
+
     def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship):
         if self.cooldown <= 0:
-            # Determine firing position based on alternation
             if self.alternate_fire and self.alternate_offsets:
                 offset_vector = self.alternate_offsets[self.current_offset_idx]
                 adjusted_position = position + offset_vector.rotate(angle)
-                # Update the offset index for next fire
                 self.current_offset_idx = (self.current_offset_idx + 1) % len(self.alternate_offsets)
             else:
-                adjusted_position = position  # Fixed position
+                adjusted_position = position
 
-            # Create projectile based on type
-            if self.projectile_type == 'laser':
-                # Calculate total velocity (ship's velocity + laser's speed)
-                firing_direction = pygame.math.Vector2(0, -1).rotate(angle).normalize()
-                total_velocity = firing_direction * self.speed + ship_velocity
+            if self.turret:
+                # Calculate spread angles
+                total_spread = self.turret_spread  # Total spread angle
+                num_projectiles = self.turret_projectiles
+                if num_projectiles > 1:
+                    start_angle = angle - (total_spread / 2)
+                    angle_increment = total_spread / (num_projectiles - 1)
+                else:
+                    start_angle = angle
+                    angle_increment = 0
 
-                laser = Laser(
-                    position=adjusted_position,
-                    angle=angle,
-                    color=self.laser_color,
-                    length=self.laser_length,
-                    width=self.laser_width,
-                    damage=self.damage,
-                    velocity=total_velocity.length(),
-                    lifetime=self.lifetime,
-                    size_scale=self.projectile_size,
-                    origin_race=origin_race,
-                    hit_sound=self.hit_sound,
-                    explosion_type=self.explosion_type,
-                    origin_relationship=origin_relationship,
-                )
-                projectiles.add(laser)
-
-            elif self.projectile_type in ['cm', 'amissile']:
-                # Create a HomingMissile
-                firing_direction = pygame.math.Vector2(0, -1).rotate(angle).normalize()
-                total_velocity = firing_direction * self.speed + ship_velocity
-
-                missile = HomingMissile(
-                    position=adjusted_position,
-                    angle=angle,
-                    sprite_sheet=self.sprite_sheet,
-                    frames=self.frames,
-                    projectile_type=self.projectile_type,
-                    damage=self.damage,
-                    velocity=total_velocity,
-                    lifetime=self.lifetime,
-                    size=self.projectile_size,
-                    mass=self.mass,
-                    origin_race=origin_race,
-                    hit_sound=self.hit_sound,
-                    explosion_type=self.explosion_type,
-                    max_rotation=0.6,  # Degrees per frame
-                    origin_relationship=origin_relationship,
-                )
-                projectiles.add(missile)
-
+                for i in range(num_projectiles):
+                    current_angle = start_angle + (i * angle_increment)
+                    self._create_projectile(adjusted_position, current_angle, projectiles, ship_velocity, origin_race, origin_relationship)
             else:
-                # Regular Projectile
-                if self.frames is None:
-                    print(f"Error: Weapon '{self.projectile_type}' has no frames loaded.")
-                    return
-
-                firing_direction = pygame.math.Vector2(0, -1).rotate(angle).normalize()
-                total_velocity = firing_direction * self.speed + ship_velocity
-
-                projectile = Projectile(
-                    position=adjusted_position,
-                    angle=angle,
-                    sprite_sheet=self.sprite_sheet,
-                    frames=self.frames,
-                    projectile_type=self.projectile_type,
-                    damage=self.damage,
-                    velocity=total_velocity,
-                    lifetime=self.lifetime,
-                    size=self.projectile_size,
-                    mass=self.mass,
-                    origin_race=origin_race,
-                    hit_sound=self.hit_sound,
-                    explosion_type=self.explosion_type,
-                    origin_relationship=origin_relationship,
-                )
-                projectiles.add(projectile)
+                self._create_projectile(adjusted_position, angle, projectiles, ship_velocity, origin_race, origin_relationship)
 
             # Play weapon fire sound
             if self.sound_manager and self.fire_sound:
@@ -124,6 +70,81 @@ class Weapon:
 
             # Set cooldown
             self.cooldown = self.fire_rate
+
+    def _create_projectile(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship):
+        # Create projectile based on type
+        if self.projectile_type == 'laser':
+            # Calculate total velocity (ship's velocity + laser's speed)
+            firing_direction = pygame.math.Vector2(0, -1).rotate(angle).normalize()
+            total_velocity = firing_direction * self.speed + ship_velocity
+
+            laser = Laser(
+                position=position,
+                angle=angle,
+                color=self.laser_color,
+                length=self.laser_length,
+                width=self.laser_width,
+                damage=self.damage,
+                velocity=total_velocity.length(),
+                lifetime=self.lifetime,
+                size_scale=self.projectile_size,
+                origin_race=origin_race,
+                hit_sound=self.hit_sound,
+                explosion_type=self.explosion_type,
+                origin_relationship=origin_relationship,
+            )
+            projectiles.add(laser)
+
+        elif self.projectile_type in ['cm', 'amissile']:
+            # Create a HomingMissile
+            firing_direction = pygame.math.Vector2(0, -1).rotate(angle).normalize()
+            total_velocity = firing_direction * self.speed + ship_velocity
+
+            missile = HomingMissile(
+                position=position,
+                angle=angle,
+                sprite_sheet=self.sprite_sheet,
+                frames=self.frames,
+                projectile_type=self.projectile_type,
+                damage=self.damage,
+                velocity=total_velocity,
+                lifetime=self.lifetime,
+                size=self.projectile_size,
+                mass=self.mass,
+                origin_race=origin_race,
+                hit_sound=self.hit_sound,
+                explosion_type=self.explosion_type,
+                max_rotation=0.6,  # Degrees per frame
+                origin_relationship=origin_relationship,
+            )
+            projectiles.add(missile)
+
+        else:
+            # Regular Projectile
+            if self.frames is None:
+                print(f"Error: Weapon '{self.projectile_type}' has no frames loaded.")
+                return
+
+            firing_direction = pygame.math.Vector2(0, -1).rotate(angle).normalize()
+            total_velocity = firing_direction * self.speed + ship_velocity
+
+            projectile = Projectile(
+                position=position,
+                angle=angle,
+                sprite_sheet=self.sprite_sheet,
+                frames=self.frames,
+                projectile_type=self.projectile_type,
+                damage=self.damage,
+                velocity=total_velocity,
+                lifetime=self.lifetime,
+                size=self.projectile_size,
+                mass=self.mass,
+                origin_race=origin_race,
+                hit_sound=self.hit_sound,
+                explosion_type=self.explosion_type,
+                origin_relationship=origin_relationship,
+            )
+            projectiles.add(projectile)
 
     def update_cooldown(self, delta_time):
         if self.cooldown > 0:

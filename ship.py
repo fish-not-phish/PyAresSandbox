@@ -151,6 +151,10 @@ class Ship(pygame.sprite.Sprite):
         weapon_type = weapon_config.get("type")
         alternate_fire = weapon_config.get("alternate_fire", False)
 
+        turret = weapon_config.get("turret", False)  # Retrieve turret flag
+        turret_projectiles = weapon_config.get("turret_projectiles", 1)  # Optional: number of projectiles
+        turret_spread = weapon_config.get("turret_spread", 15)
+
         if alternate_fire:
             try:
                 sprite_sheet, frames = load_weapon_assets(BASE_ASSETS_PATH, self.race, weapon_type)
@@ -185,7 +189,10 @@ class Ship(pygame.sprite.Sprite):
                 laser_length=weapon_config.get("laser_length", 100),
                 laser_width=weapon_config.get("laser_width", 5),
                 alternate_fire=True,                  # Enable alternation
-                alternate_offsets=alternate_offsets    # Provide offset vectors
+                alternate_offsets=alternate_offsets,    # Provide offset vectors
+                turret=turret,                         # Pass turret flag
+                turret_projectiles=turret_projectiles, # Pass turret projectile count
+                turret_spread=turret_spread
             )
 
         elif weapon_type == "laser":
@@ -203,7 +210,10 @@ class Ship(pygame.sprite.Sprite):
                 laser_color=weapon_config.get("laser_color", (255, 0, 0)),
                 laser_length=weapon_config.get("laser_length", 100),
                 laser_width=weapon_config.get("laser_width", 5),
-                alternate_fire=False                   # Disable alternation
+                alternate_fire=False,                   # Disable alternation
+                turret=turret,                         # Pass turret flag
+                turret_projectiles=turret_projectiles, # Pass turret projectile count
+                turret_spread=turret_spread
             )
         
         elif weapon_type == "trazer":
@@ -223,7 +233,10 @@ class Ship(pygame.sprite.Sprite):
                 laser_color=weapon_config.get("laser_color", (255, 0, 0)),
                 laser_length=weapon_config.get("laser_length", 100),
                 laser_width=weapon_config.get("laser_width", 5),
-                alternate_fire=False                   # Assuming 'trazer' doesn't alternate
+                alternate_fire=False,                   # Assuming 'trazer' doesn't alternate
+                turret=turret,                         # Pass turret flag
+                turret_projectiles=turret_projectiles, # Pass turret projectile count
+                turret_spread=turret_spread
             )
         
         else:
@@ -234,6 +247,10 @@ class Ship(pygame.sprite.Sprite):
             except FileNotFoundError as e:
                 print(f"Error loading weapon assets: {e}")
                 return None
+            
+            turret = weapon_config.get("turret", False)
+            turret_projectiles = weapon_config.get("turret_projectiles", 1)
+            turret_spread = weapon_config.get("turret_spread", 15)
 
             return Weapon(
                 damage=weapon_config.get("damage", 10),
@@ -249,10 +266,13 @@ class Ship(pygame.sprite.Sprite):
                 fire_sound=weapon_config.get("fire_sound"),
                 hit_sound=weapon_config.get("hit_sound"),
                 explosion_type=weapon_config.get("explosion_type", "weapon_hit"),
-                alternate_fire=False                   # Default to no alternation
+                alternate_fire=False,                   # Default to no alternation
+                turret=turret,                         # Pass turret flag
+                turret_projectiles=turret_projectiles, # Pass turret projectile count
+                turret_spread=turret_spread
             )
 
-    def fire_weapon(self, weapon_type, projectiles):
+    def fire_weapon(self, weapon_type, projectiles, target_angle=None):
         if weapon_type == "primary" and self.primary_weapon:
             if isinstance(self.primary_weapon, TrazerWeapon):
                 self.primary_weapon.fire(
@@ -264,11 +284,11 @@ class Ship(pygame.sprite.Sprite):
                     self.relationship  # Pass the relationship
                 )
             else:
-                # Existing firing logic for other weapons
-                spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
+                firing_angle = target_angle if target_angle is not None else self.angle
+                spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(firing_angle)
                 self.primary_weapon.fire(
                     spawn_position, 
-                    self.angle, 
+                    firing_angle, 
                     projectiles, 
                     self.velocity, 
                     self.race, 

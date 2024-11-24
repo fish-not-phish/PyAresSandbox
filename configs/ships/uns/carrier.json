@@ -9,16 +9,17 @@
     "friction": 0.05,
     "weapons": {
         "primary": {
-            "type": "onas",
+            "type": "magneto",
             "speed": 400,
             "lifetime": 2,
             "size": 0.7,
             "damage": 50,
             "fire_rate": 0.2,
             "mass": 0.0,
-            "fire_sound": "onas_fire",
+            "fire_sound": "magneto_fire",
             "hit_sound": "basic_weapon_hit",
-            "explosion_type": "weapon_hit"
+            "explosion_type": "weapon_hit",
+            "turret": true
         },
         "secondary": {
             "type": "laser",
@@ -32,7 +33,8 @@
             "laser_width": 1,
             "fire_sound": "ele_laser_fire",
             "hit_sound": "basic_weapon_hit",
-            "explosion_type": "weapon_hit"
+            "explosion_type": "weapon_hit",
+            "turret": true
         },
         "special": null
     }
