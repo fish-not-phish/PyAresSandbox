@@ -33,7 +33,7 @@ class Weapon:
             self.alternate_offsets = alternate_offsets
         self.current_offset_idx = 0 
 
-    def fire(self, position, angle, projectiles, ship_velocity, origin_race):
+    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship):
         if self.cooldown <= 0:
             # Determine firing position based on alternation
             if self.alternate_fire and self.alternate_offsets:
@@ -62,7 +62,8 @@ class Weapon:
                     size_scale=self.projectile_size,
                     origin_race=origin_race,
                     hit_sound=self.hit_sound,
-                    explosion_type=self.explosion_type
+                    explosion_type=self.explosion_type,
+                    origin_relationship=origin_relationship,
                 )
                 projectiles.add(laser)
 
@@ -85,7 +86,8 @@ class Weapon:
                     origin_race=origin_race,
                     hit_sound=self.hit_sound,
                     explosion_type=self.explosion_type,
-                    max_rotation=0.6  # Degrees per frame
+                    max_rotation=0.6,  # Degrees per frame
+                    origin_relationship=origin_relationship,
                 )
                 projectiles.add(missile)
 
@@ -112,6 +114,7 @@ class Weapon:
                     origin_race=origin_race,
                     hit_sound=self.hit_sound,
                     explosion_type=self.explosion_type,
+                    origin_relationship=origin_relationship,
                 )
                 projectiles.add(projectile)
 
@@ -146,7 +149,7 @@ class TrazerWeapon(Weapon):
         self.sound_timer = 0
         self.sound_interval = 0.5
 
-    def fire(self, position, angle, projectiles, ship_velocity, origin_race):
+    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship):
         self.is_firing = True  # Start firing state
         if len(self.attached_lasers) == 0:
             # On first fire, add multiple lasers
@@ -214,7 +217,8 @@ class TrazerWeapon(Weapon):
             damage=self.damage,
             lifetime=lifetime,
             ship=ship,
-            origin_race=ship.race
+            origin_race=ship.race,
+            origin_relationship=ship.relationship,
         )
         self.attached_lasers.add(attached_laser)
 

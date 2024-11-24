@@ -37,6 +37,9 @@ class Ship(pygame.sprite.Sprite):
         self.secondary_weapon = self.load_weapon(weapon_data.get("secondary"), sound_manager)
         self.special_weapon = self.load_weapon(weapon_data.get("special"), sound_manager)
 
+        # Store the ship's relationship (friend or foe)
+        self.relationship = config.get("relationship", "foe")
+
         self.update_image()
 
     def update_image(self):
@@ -252,17 +255,45 @@ class Ship(pygame.sprite.Sprite):
     def fire_weapon(self, weapon_type, projectiles):
         if weapon_type == "primary" and self.primary_weapon:
             if isinstance(self.primary_weapon, TrazerWeapon):
-                self.primary_weapon.fire(self.position, self.angle, projectiles, self.velocity, self.race)
+                self.primary_weapon.fire(
+                    self.position, 
+                    self.angle, 
+                    projectiles, 
+                    self.velocity, 
+                    self.race, 
+                    self.relationship  # Pass the relationship
+                )
             else:
                 # Existing firing logic for other weapons
                 spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
-                self.primary_weapon.fire(spawn_position, self.angle, projectiles, self.velocity, self.race)
+                self.primary_weapon.fire(
+                    spawn_position, 
+                    self.angle, 
+                    projectiles, 
+                    self.velocity, 
+                    self.race, 
+                    self.relationship  # Pass the relationship
+                )
         elif weapon_type == "secondary" and self.secondary_weapon:
             spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
-            self.secondary_weapon.fire(spawn_position, self.angle, projectiles, self.velocity, self.race)
+            self.secondary_weapon.fire(
+                spawn_position, 
+                self.angle, 
+                projectiles, 
+                self.velocity, 
+                self.race, 
+                self.relationship  # Pass the relationship
+            )
         elif weapon_type == "special" and self.special_weapon:
             spawn_position = self.position + pygame.math.Vector2(0, -10).rotate(self.angle)
-            self.special_weapon.fire(spawn_position, self.angle, projectiles, self.velocity, self.race)
+            self.special_weapon.fire(
+                spawn_position, 
+                self.angle, 
+                projectiles, 
+                self.velocity, 
+                self.race, 
+                self.relationship  # Pass the relationship
+            )
 
     def update_weapons(self, delta_time):
         """Update the cooldowns and states for all weapons."""

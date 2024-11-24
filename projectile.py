@@ -2,7 +2,7 @@ import pygame
 import math
 
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size=1.0, mass=0.0, origin_race=None, hit_sound=None, explosion_type='weapon_hit'):
+    def __init__(self, position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size=1.0, mass=0.0, origin_race=None, origin_relationship=None,hit_sound=None, explosion_type='weapon_hit'):
         super().__init__()
         self.position = pygame.math.Vector2(position)
         self.velocity = velocity  # Use the velocity passed in
@@ -22,6 +22,7 @@ class Projectile(pygame.sprite.Sprite):
         self.size_scale = size
         self.mass = mass
         self.origin_race = origin_race
+        self.origin_relationship = origin_relationship
         self.hit_sound = hit_sound
         self.explosion_type = explosion_type
         self.load_image()
@@ -127,6 +128,7 @@ class Laser(pygame.sprite.Sprite):
         lifetime,
         size_scale=1.0,  # Add this parameter with a default value
         origin_race=None,
+        origin_relationship=None,
         hit_sound=None,
         explosion_type='weapon_hit'
     ):
@@ -141,6 +143,7 @@ class Laser(pygame.sprite.Sprite):
         self.lifetime = lifetime  # Duration the laser exists in seconds
         self.elapsed_time = 0  # Time the laser has been active
         self.origin_race = origin_race
+        self.origin_relationship = origin_relationship
         self.hit_sound = hit_sound
         self.explosion_type = explosion_type
         self.size_scale = size_scale  # Add this line to store the size scale
@@ -196,7 +199,7 @@ class Laser(pygame.sprite.Sprite):
         surface.blit(scaled_image, scaled_rect.topleft)
 
 class AttachedLaser(pygame.sprite.Sprite):
-    def __init__(self, offset_angle, distance, laser_angle, length, width, color, damage, lifetime, ship, origin_race):
+    def __init__(self, offset_angle, distance, laser_angle, length, width, color, damage, lifetime, ship, origin_race, origin_relationship):
         super().__init__()
         self.offset_angle = offset_angle
         self.distance = distance
@@ -209,6 +212,7 @@ class AttachedLaser(pygame.sprite.Sprite):
         self.elapsed_time = 0
         self.ship = ship
         self.origin_race = origin_race
+        self.origin_relationship = origin_relationship
         self.particle_spawn_cooldown = 0.0
 
         # Calculate initial offset vector without ship's angle
@@ -277,8 +281,8 @@ class AttachedLaser(pygame.sprite.Sprite):
 # projectile.py
 
 class HomingMissile(Projectile):
-    def __init__(self, position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size=1.0, mass=0.0, origin_race=None, hit_sound=None, explosion_type='weapon_hit', max_rotation=5):
-        super().__init__(position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size, mass, origin_race, hit_sound, explosion_type)
+    def __init__(self, position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size=1.0, mass=0.0, origin_race=None, origin_relationship=None,hit_sound=None, explosion_type='weapon_hit', max_rotation=5):
+        super().__init__(position, angle, sprite_sheet, frames, projectile_type, damage, velocity, lifetime, size, mass, origin_race, origin_relationship, hit_sound, explosion_type)
         self.is_homing = True
         self.max_rotation = max_rotation  # Degrees per frame, adjust as needed
 

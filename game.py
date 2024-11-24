@@ -18,13 +18,17 @@ particles = pygame.sprite.Group()
 
 def handle_attached_laser_collision(ship, laser, collision_position):
     global delta_time
-    # Apply damage to the ship
-    ship.health -= laser.damage * delta_time  # Damage over time
+    # Check relationship before applying damage
+    if ((laser.origin_relationship == 'friend' and ship.relationship == 'foe') or
+        (laser.origin_relationship == 'foe' and ship.relationship == 'friend')):
+        
+        # Apply damage to the ship
+        ship.health -= laser.damage * delta_time  # Damage over time
 
-    # Spawn particles at the collision point if cooldown allows
-    if laser.particle_spawn_cooldown <= 0:
-        spawn_particles(collision_position)
-        laser.particle_spawn_cooldown = 0.2
+        # Spawn particles at the collision point if cooldown allows
+        if laser.particle_spawn_cooldown <= 0:
+            spawn_particles(collision_position)
+            laser.particle_spawn_cooldown = 0.2
 
 def spawn_particles(collision_position):
     # Spawn particles at the point of collision
@@ -39,38 +43,42 @@ def spawn_particles(collision_position):
         particles.add(particle)
 
 def handle_projectile_collision(ship, projectile):
-    # Apply damage to the ship
-    ship.health -= projectile.damage
+    # Check relationship before applying damage
+    if ((projectile.origin_relationship == 'friend' and ship.relationship == 'foe') or
+        (projectile.origin_relationship == 'foe' and ship.relationship == 'friend')):
 
-    # Remove the projectile
-    projectile.kill()
+        # Apply damage to the ship
+        ship.health -= projectile.damage
 
-    # Play the projectile's hit sound
-    if hasattr(projectile, 'hit_sound') and projectile.hit_sound:
-        sound_manager.play_sound(projectile.hit_sound)
+        # Remove the projectile
+        projectile.kill()
 
-    # Select the appropriate explosion assets based on the projectile's explosion_type
-    if hasattr(projectile, 'explosion_type'):
-        if projectile.explosion_type == 'missile_hit':
-            explosion_sprite_sheet = missile_hit_sprite_sheet
-            explosion_frames = missile_hit_frames
-            animation_speed = 1.0  
-            duration = 1.0
-        else:
-            explosion_sprite_sheet = weapon_hit_sprite_sheet
-            explosion_frames = weapon_hit_frames
-            animation_speed = 1.0  
-            duration = 0.3
+        # Play the projectile's hit sound
+        if hasattr(projectile, 'hit_sound') and projectile.hit_sound:
+            sound_manager.play_sound(projectile.hit_sound)
 
-    explosion = Explosion(
-        position=projectile.position,
-        sprite_sheet=explosion_sprite_sheet,
-        frames=explosion_frames,
-        size=projectile.size_scale,
-        duration=duration,           
-        animation_speed=animation_speed  
-    )
-    explosions.add(explosion)
+        # Select the appropriate explosion assets based on the projectile's explosion_type
+        if hasattr(projectile, 'explosion_type'):
+            if projectile.explosion_type == 'missile_hit':
+                explosion_sprite_sheet = missile_hit_sprite_sheet
+                explosion_frames = missile_hit_frames
+                animation_speed = 1.0  
+                duration = 1.0
+            else:
+                explosion_sprite_sheet = weapon_hit_sprite_sheet
+                explosion_frames = weapon_hit_frames
+                animation_speed = 1.0  
+                duration = 0.3
+
+        explosion = Explosion(
+            position=projectile.position,
+            sprite_sheet=explosion_sprite_sheet,
+            frames=explosion_frames,
+            size=projectile.size_scale,
+            duration=duration,           
+            animation_speed=animation_speed  
+        )
+        explosions.add(explosion)
 
 def handle_ship_collision(ship1, ship2):
     # Calculate the normal vector between the ships

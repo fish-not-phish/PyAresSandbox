@@ -21,12 +21,18 @@ class Level:
     def load_level_data(self):
         LEVEL_DATA = {
             1: {
-                "uns": [
-                    {"type": "hvd", "x": 200, "y": 150},
-                ],
-                "ish": [
-                    {"type": "hvd", "x": 400, "y": 300},
-                ],
+                "aud": {
+                    "relationship": "friend",
+                    "ships": [
+                        {"type": "carrier", "x": 200, "y": 150},
+                    ]
+                },
+                "ish": {
+                    "relationship": "friend",
+                    "ships": [
+                        {"type": "hvd", "x": 400, "y": 300},
+                    ]
+                },
             },
             2: {
                 "uns": [
@@ -42,10 +48,18 @@ class Level:
 
         # Load the level configuration
         level_config = LEVEL_DATA.get(self.level_number, {})
-        for race, ships in level_config.items():
+        for race, race_info in level_config.items():
+            relationship = race_info.get("relationship", "foe")  # Default to 'foe' if not specified
+            ships = race_info.get("ships", [])
             for ship_entry in ships:
                 # Load ship constants from external file
                 ship_constants = self.load_ship_config(race, ship_entry["type"])
                 # Merge constants with level-specific attributes
-                ship_config = {**ship_constants, "x": ship_entry["x"], "y": ship_entry["y"], "race": race}
+                ship_config = {
+                    **ship_constants,
+                    "x": ship_entry["x"],
+                    "y": ship_entry["y"],
+                    "race": race,
+                    "relationship": relationship  # Assign the relationship
+                }
                 self.ships.append(ship_config)
