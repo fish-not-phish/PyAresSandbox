@@ -21,7 +21,7 @@ class Level:
     def load_level_data(self):
         LEVEL_DATA = {
             1: {
-                "uns": {
+                "gai": {
                     "relationship": "friend",
                     "ships": [
                         {"type": "gunship", "x": 200, "y": 150},

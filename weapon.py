@@ -95,7 +95,11 @@ class Weapon:
             )
             projectiles.add(laser)
 
-        elif self.projectile_type in ['cm', 'amissile']:
+        elif self.projectile_type in ['cm', 'amissile', 'atomic']:
+            if self.projectile_type == 'atomic':
+                max_rotation = 1.4
+            else:
+                max_rotation=0.6
             # Create a HomingMissile
             firing_direction = pygame.math.Vector2(0, -1).rotate(angle).normalize()
             total_velocity = firing_direction * self.speed + ship_velocity
@@ -114,7 +118,7 @@ class Weapon:
                 origin_race=origin_race,
                 hit_sound=self.hit_sound,
                 explosion_type=self.explosion_type,
-                max_rotation=0.6,  # Degrees per frame
+                max_rotation=max_rotation,
                 origin_relationship=origin_relationship,
             )
             projectiles.add(missile)
