@@ -21,8 +21,8 @@ class Level:
     def load_level_data(self):
         LEVEL_DATA = {
             1: {
-                "aud": [
-                    {"type": "carrier", "x": 200, "y": 150},
+                "uns": [
+                    {"type": "hvd", "x": 200, "y": 150},
                 ],
                 "ish": [
                     {"type": "hvd", "x": 400, "y": 300},

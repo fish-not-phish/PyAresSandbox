@@ -21,7 +21,7 @@
         },
         "secondary": {
             "type": "amissile",
-            "speed": 400,
+            "speed": 500,
             "lifetime": 2,
             "size": 1.0,
             "damage": 200,

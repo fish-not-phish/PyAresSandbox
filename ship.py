@@ -146,8 +146,46 @@ class Ship(pygame.sprite.Sprite):
             return None
 
         weapon_type = weapon_config.get("type")
+        alternate_fire = weapon_config.get("alternate_fire", False)
 
-        if weapon_type == "laser":
+        if alternate_fire:
+            try:
+                sprite_sheet, frames = load_weapon_assets(BASE_ASSETS_PATH, self.race, weapon_type)
+                print(f"Loaded weapon '{weapon_type}' with {len(frames)} frames.")
+            except FileNotFoundError as e:
+                print(f"Error loading weapon assets: {e}")
+                return None
+
+            # Define alternate offsets (left and right relative to the ship)
+            # Example: Left offset at (-15, 0), Right offset at (15, 0)
+            # Adjust the values based on your ship's dimensions and desired firing positions
+            alternate_offsets = [
+                pygame.math.Vector2(-weapon_config.get("alternate_offset", 10), 0),
+                pygame.math.Vector2(weapon_config.get("alternate_offset", 10), 0)
+            ]
+
+            return Weapon(
+                damage=weapon_config.get("damage", 10),
+                fire_rate=weapon_config.get("fire_rate", 0.5),
+                projectile_type=weapon_type,
+                sprite_sheet=sprite_sheet,
+                pn_file=frames,
+                speed=weapon_config.get("speed", 10),
+                lifetime=weapon_config.get("lifetime", 2),
+                size=weapon_config.get("size", 1.0),
+                mass=weapon_config.get("mass", 0.0),
+                sound_manager=sound_manager,
+                fire_sound=weapon_config.get("fire_sound"),
+                hit_sound=weapon_config.get("hit_sound"),
+                explosion_type=weapon_config.get("explosion_type", "weapon_hit"),
+                laser_color=tuple(weapon_config.get("laser_color", (255, 0, 0))),
+                laser_length=weapon_config.get("laser_length", 100),
+                laser_width=weapon_config.get("laser_width", 5),
+                alternate_fire=True,                  # Enable alternation
+                alternate_offsets=alternate_offsets    # Provide offset vectors
+            )
+
+        elif weapon_type == "laser":
             return Weapon(
                 damage=weapon_config.get("damage", 10),
                 fire_rate=weapon_config.get("fire_rate", 0.5),
@@ -162,6 +200,7 @@ class Ship(pygame.sprite.Sprite):
                 laser_color=weapon_config.get("laser_color", (255, 0, 0)),
                 laser_length=weapon_config.get("laser_length", 100),
                 laser_width=weapon_config.get("laser_width", 5),
+                alternate_fire=False                   # Disable alternation
             )
         
         elif weapon_type == "trazer":
@@ -181,11 +220,18 @@ class Ship(pygame.sprite.Sprite):
                 laser_color=weapon_config.get("laser_color", (255, 0, 0)),
                 laser_length=weapon_config.get("laser_length", 100),
                 laser_width=weapon_config.get("laser_width", 5),
+                alternate_fire=False                   # Assuming 'trazer' doesn't alternate
             )
         
         else:
             # For other weapon types, load assets normally
-            sprite_sheet, frames = load_weapon_assets(BASE_ASSETS_PATH, self.race, weapon_type)
+            try:
+                sprite_sheet, frames = load_weapon_assets(BASE_ASSETS_PATH, self.race, weapon_type)
+                print(f"Loaded weapon '{weapon_type}' with {len(frames)} frames.")
+            except FileNotFoundError as e:
+                print(f"Error loading weapon assets: {e}")
+                return None
+
             return Weapon(
                 damage=weapon_config.get("damage", 10),
                 fire_rate=weapon_config.get("fire_rate", 0.5),
@@ -200,6 +246,7 @@ class Ship(pygame.sprite.Sprite):
                 fire_sound=weapon_config.get("fire_sound"),
                 hit_sound=weapon_config.get("hit_sound"),
                 explosion_type=weapon_config.get("explosion_type", "weapon_hit"),
+                alternate_fire=False                   # Default to no alternation
             )
 
     def fire_weapon(self, weapon_type, projectiles):

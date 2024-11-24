@@ -9,18 +9,6 @@
     "friction": 0.05,
     "weapons": {
         "primary": {
-            "type": "onas",
-            "speed": 400,
-            "lifetime": 2,
-            "size": 0.7,
-            "damage": 50,
-            "fire_rate": 0.2,
-            "mass": 0.0,
-            "fire_sound": "onas_fire",
-            "hit_sound": "basic_weapon_hit",
-            "explosion_type": "weapon_hit"
-        },
-        "secondary": {
             "type": "laser",
             "speed": 400,
             "lifetime": 2,
@@ -34,6 +22,7 @@
             "hit_sound": "basic_weapon_hit",
             "explosion_type": "weapon_hit"
         },
+        "secondary": null,
         "special": null
     }
 }
