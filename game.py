@@ -1,7 +1,7 @@
 from ship import Ship
 from level import Level
 from grid import draw_grid
-from utils import load_ship_assets, load_explosion_assets
+from utils import *
 import pygame
 from pygame.locals import *
 import sys
@@ -16,17 +16,6 @@ import random
 
 # Particle group
 particles = pygame.sprite.Group()
-
-def find_closest_enemy(ship, ships):
-    min_distance = float('inf')
-    closest_ship = None
-    for other_ship in ships:
-        if other_ship != ship and other_ship.relationship != ship.relationship:
-            distance = ship.position.distance_to(other_ship.position)
-            if distance < min_distance:
-                min_distance = distance
-                closest_ship = other_ship
-    return closest_ship
 
 def handle_attached_laser_collision(ship, laser, collision_position):
     global delta_time
@@ -203,6 +192,7 @@ sound_manager.load_sound('amissile_fire', os.path.join(BASE_ASSETS_PATH, 'sounds
 sound_manager.load_sound('trazer_fire', os.path.join(BASE_ASSETS_PATH, 'sounds', 'trazer_fire.wav'))
 sound_manager.load_sound('atomic_fire', os.path.join(BASE_ASSETS_PATH, 'sounds', 'atomic_fire.wav'))
 sound_manager.load_sound('anti_fire', os.path.join(BASE_ASSETS_PATH, 'sounds', 'anti_fire.wav'))
+sound_manager.load_sound('tspace_fire', os.path.join(BASE_ASSETS_PATH, 'sounds', 'tspace_fire.wav'))
 sound_manager.load_sound('chronon_fire', os.path.join(BASE_ASSETS_PATH, 'sounds', 'chronon_fire.wav'))
 sound_manager.load_sound('cluster_fire', os.path.join(BASE_ASSETS_PATH, 'sounds', 'cluster_fire.wav'))
 sound_manager.load_sound('fireball_fire', os.path.join(BASE_ASSETS_PATH, 'sounds', 'fireball_fire.wav'))
@@ -329,11 +319,13 @@ while running:
                     else:
                         # Turret is disabled; always fire straight ahead
                         firing_angle = player_ship.angle
-                    player_ship.fire_weapon(weapon_type, projectiles, firing_angle)
+                    player_ship.fire_weapon(weapon_type, projectiles, firing_angle, ships)
             else:
                 # Stop firing if the key is not pressed and the weapon supports continuous firing
                 weapon = getattr(player_ship, f"{weapon_type}_weapon", None)
                 if isinstance(weapon, TrazerWeapon):
+                    weapon.stop_firing()
+                if isinstance(weapon, TSpaceWeapon):
                     weapon.stop_firing()
         
     # Update camera position to follow the player ship
@@ -343,7 +335,7 @@ while running:
     # Update game state
     for ship in ships:
         ship.update_position(delta_time)
-        ship.update_weapons(delta_time)
+        ship.update_weapons(delta_time, ships, projectiles)
 
     # Check for ship-ship collisions
     for i in range(len(ships)):
@@ -378,11 +370,11 @@ while running:
                     weapon = getattr(ship, weapon_slot, None)
                     if isinstance(weapon, TrazerWeapon):
                         for laser in weapon.attached_lasers:
-                            if laser.origin_relationship != ship.relationship:
-                                # Swap parameters to get offset in laser's coordinate space
+                            # Corrected condition: Compare with other_ship's relationship
+                            if laser.origin_relationship != other_ship.relationship:
+                                # Collision logic remains the same
                                 offset = pygame.sprite.collide_mask(laser, other_ship)
                                 if offset:
-                                    # Calculate collision position in the laser's coordinate space
                                     collision_position = laser.rect.topleft + pygame.math.Vector2(offset)
                                     handle_attached_laser_collision(other_ship, laser, collision_position)
 

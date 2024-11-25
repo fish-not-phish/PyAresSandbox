@@ -215,6 +215,29 @@ class Ship(pygame.sprite.Sprite):
                 turret_spread=turret_spread
             )
         
+        elif weapon_type == "tspace":
+            return TSpaceWeapon(
+                particles_group=self.particles_group,
+                damage=weapon_config.get("damage", 30),
+                fire_rate=weapon_config.get("fire_rate", 0.1),
+                projectile_type=weapon_type,
+                speed=weapon_config.get("speed", 10),
+                lifetime=weapon_config.get("lifetime", 2),
+                size=weapon_config.get("size", 1.0),
+                mass=weapon_config.get("mass", 0.0),
+                sound_manager=sound_manager,
+                fire_sound=weapon_config.get("fire_sound"),
+                hit_sound=weapon_config.get("hit_sound"),
+                explosion_type=weapon_config.get("explosion_type", "weapon_hit"),
+                laser_color=tuple(weapon_config.get("laser_color", (165, 78, 186))),
+                laser_length=weapon_config.get("laser_length", 100),
+                laser_width=weapon_config.get("laser_width", 3),
+                alternate_fire=False,                   # Disable alternation
+                turret=turret,                         # Enable turret
+                turret_projectiles=turret_projectiles, # Pass turret projectile count
+                turret_spread=turret_spread
+            )
+        
         elif weapon_type == "trazer":
             return TrazerWeapon(
                 particles_group=self.particles_group,
@@ -271,7 +294,7 @@ class Ship(pygame.sprite.Sprite):
                 turret_spread=turret_spread
             )
 
-    def fire_weapon(self, weapon_type, projectiles, target_angle=None):
+    def fire_weapon(self, weapon_type, projectiles, target_angle=None, ships=None):
         if weapon_type == "primary" and self.primary_weapon:
             if isinstance(self.primary_weapon, TrazerWeapon):
                 self.primary_weapon.fire(
@@ -280,7 +303,8 @@ class Ship(pygame.sprite.Sprite):
                     projectiles, 
                     self.velocity, 
                     self.race, 
-                    self.relationship  # Pass the relationship
+                    self.relationship,  # Pass the relationship
+                    ships
                 )
             else:
                 firing_angle = target_angle if target_angle is not None else self.angle
@@ -291,7 +315,8 @@ class Ship(pygame.sprite.Sprite):
                     projectiles, 
                     self.velocity, 
                     self.race, 
-                    self.relationship  # Pass the relationship
+                    self.relationship,  # Pass the relationship
+                    ships
                 )
         elif weapon_type == "secondary" and self.secondary_weapon:
             firing_angle = target_angle if target_angle is not None else self.angle
@@ -302,7 +327,8 @@ class Ship(pygame.sprite.Sprite):
                 projectiles, 
                 self.velocity, 
                 self.race, 
-                self.relationship  # Pass the relationship
+                self.relationship,  # Pass the relationship
+                ships
             )
         elif weapon_type == "special" and self.special_weapon:
             firing_angle = target_angle if target_angle is not None else self.angle
@@ -313,17 +339,18 @@ class Ship(pygame.sprite.Sprite):
                 projectiles, 
                 self.velocity, 
                 self.race, 
-                self.relationship  # Pass the relationship
+                self.relationship,  # Pass the relationship
+                ships
             )
 
-    def update_weapons(self, delta_time):
+    def update_weapons(self, delta_time, ships, projectiles):
         """Update the cooldowns and states for all weapons."""
         if self.primary_weapon:
             self.primary_weapon.update_cooldown(delta_time)
-            self.primary_weapon.update(delta_time, self)
+            self.primary_weapon.update(delta_time, self, ships, projectiles)
         if self.secondary_weapon:
             self.secondary_weapon.update_cooldown(delta_time)
-            self.secondary_weapon.update(delta_time, self)
+            self.secondary_weapon.update(delta_time, self, ships, projectiles)
         if self.special_weapon:
             self.special_weapon.update_cooldown(delta_time)
-            self.special_weapon.update(delta_time, self)
+            self.special_weapon.update(delta_time, self, ships, projectiles)

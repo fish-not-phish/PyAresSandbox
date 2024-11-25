@@ -300,7 +300,7 @@ class HomingMissile(Projectile):
             min_distance = float('inf')
             closest_ship = None
             for ship in ships:
-                if ship.race != self.origin_race:
+                if ship.relationship != self.origin_relationship:
                     distance = self.position.distance_to(ship.position)
                     if distance < min_distance:
                         min_distance = distance
@@ -322,6 +322,12 @@ class HomingMissile(Projectile):
                 # Update the angle for rendering
                 self.angle = -self.velocity.angle_to(pygame.math.Vector2(0, -1))
         
+        if self.projectile_type in ['atomic', 'magno'] and self.zoom_level >= self.shape_render_threshold:
+            self.frame_timer += delta_time
+            if self.frame_timer >= self.animation_speed:
+                self.image_idx = (self.image_idx + 1) % len(self.frames)
+                self.load_image()
+                self.frame_timer = 0
         # Update position
         self.position += self.velocity * delta_time
         self.rect.center = self.position
@@ -331,25 +337,28 @@ class HomingMissile(Projectile):
 
     def load_image(self):
         """Load and rotate the missile image based on current angle."""
-        # Use the first frame for missiles
-        frame = self.frames[0]
+        if self.projectile_type in ['atomic', 'magno']:
+            super().load_image()
+        else:
+            # Use the first frame for missiles
+            frame = self.frames[0]
 
-        # Extract the frame from the sprite sheet
-        sprite_rect = pygame.Rect(frame['left'], frame['top'], frame['right'] - frame['left'], frame['bottom'] - frame['top'])
-        original_image = self.sprite_sheet.subsurface(sprite_rect).copy()
+            # Extract the frame from the sprite sheet
+            sprite_rect = pygame.Rect(frame['left'], frame['top'], frame['right'] - frame['left'], frame['bottom'] - frame['top'])
+            original_image = self.sprite_sheet.subsurface(sprite_rect).copy()
 
-        # Scale the sprite image based on the size scale
-        original_width = sprite_rect.width
-        original_height = sprite_rect.height
-        scaled_width = int(original_width * self.size_scale)
-        scaled_height = int(original_height * self.size_scale)
-        self.image = pygame.transform.smoothscale(original_image, (scaled_width, scaled_height))
+            # Scale the sprite image based on the size scale
+            original_width = sprite_rect.width
+            original_height = sprite_rect.height
+            scaled_width = int(original_width * self.size_scale)
+            scaled_height = int(original_height * self.size_scale)
+            self.image = pygame.transform.smoothscale(original_image, (scaled_width, scaled_height))
 
-        # Rotate the image to match the missile's angle
-        self.image = pygame.transform.rotate(self.image, -self.angle)
+            # Rotate the image to match the missile's angle
+            self.image = pygame.transform.rotate(self.image, -self.angle)
 
-        # Update the rect for positioning
-        self.rect = self.image.get_rect(center=self.position)
+            # Update the rect for positioning
+            self.rect = self.image.get_rect(center=self.position)
 
-        # Create a mask for collision detection
-        self.mask = pygame.mask.from_surface(self.image)
+            # Create a mask for collision detection
+            self.mask = pygame.mask.from_surface(self.image)

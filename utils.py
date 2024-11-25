@@ -81,3 +81,13 @@ def recolor_surface(surface, color):
     recolored_surface.blit(surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
     return recolored_surface
 
+def find_closest_enemy(ship, ships):
+    min_distance = float('inf')
+    closest_ship = None
+    for other_ship in ships:
+        if other_ship != ship and other_ship.relationship != ship.relationship:
+            distance = ship.position.distance_to(other_ship.position)
+            if distance < min_distance:
+                min_distance = distance
+                closest_ship = other_ship
+    return closest_ship

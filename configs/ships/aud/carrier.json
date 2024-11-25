@@ -15,6 +15,7 @@
             "size": 1.0,
             "laser_color": [165, 78, 186],
             "laser_width": 1,
+            "max_lasers": 12,
             "fire_sound": "trazer_fire",
             "hit_sound": "basic_weapon_hit",
             "explosion_type": "weapon_hit"
