@@ -304,7 +304,8 @@ class Ship(pygame.sprite.Sprite):
                     self.velocity, 
                     self.race, 
                     self.relationship,  # Pass the relationship
-                    ships
+                    ships,
+                    ship=self
                 )
             else:
                 firing_angle = target_angle if target_angle is not None else self.angle
@@ -316,7 +317,8 @@ class Ship(pygame.sprite.Sprite):
                     self.velocity, 
                     self.race, 
                     self.relationship,  # Pass the relationship
-                    ships
+                    ships,
+                    ship=self
                 )
         elif weapon_type == "secondary" and self.secondary_weapon:
             firing_angle = target_angle if target_angle is not None else self.angle
@@ -328,7 +330,8 @@ class Ship(pygame.sprite.Sprite):
                 self.velocity, 
                 self.race, 
                 self.relationship,  # Pass the relationship
-                ships
+                ships,
+                ship=self
             )
         elif weapon_type == "special" and self.special_weapon:
             firing_angle = target_angle if target_angle is not None else self.angle
@@ -340,7 +343,8 @@ class Ship(pygame.sprite.Sprite):
                 self.velocity, 
                 self.race, 
                 self.relationship,  # Pass the relationship
-                ships
+                ships,
+                ship=self
             )
 
     def update_weapons(self, delta_time, ships, projectiles):
@@ -354,3 +358,125 @@ class Ship(pygame.sprite.Sprite):
         if self.special_weapon:
             self.special_weapon.update_cooldown(delta_time)
             self.special_weapon.update(delta_time, self, ships, projectiles)
+
+    def think(self, delta_time, ships, projectiles):
+        """
+        Override in subclasses if necessary.
+        """
+        pass
+
+class NonPlayerShip(Ship):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.target = None
+        self.behavior = "idle"  # Default behavior
+
+    def think(self, delta_time, ships, projectiles):
+        """
+        Perform AI logic for non-player ships.
+        """
+        if not ships:
+            return  # No ships to interact with
+
+        # Target selection logic
+        self.target = self.select_target(ships)
+        if not self.target:
+            self.behavior = "idle"
+        else:
+            # Decide behavior based on distance to target
+            distance = self.position.distance_to(self.target.position)
+            if distance > 200:
+                self.behavior = "engage"
+            elif distance < 100:
+                self.behavior = "evade"
+            else:
+                self.behavior = "engage"  # Maintain engagement within a comfortable range
+
+        # Execute behavior based on current state
+        if self.behavior == "idle":
+            self.idle_behavior(delta_time)
+        elif self.behavior == "engage":
+            self.engage_behavior(delta_time, projectiles, ships)
+        elif self.behavior == "evade":
+            self.evade_behavior(delta_time)
+
+
+    def select_target(self, ships):
+        """
+        Select the closest target that is a foe.
+        """
+        min_distance = float("inf")
+        closest_target = None
+
+        for ship in ships:
+            if ship.relationship != self.relationship:  # Opposing ships
+                distance = self.position.distance_to(ship.position)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_target = ship
+
+        return closest_target
+
+    def idle_behavior(self, delta_time):
+        """
+        Default idle behavior.
+        """
+        # Maintain current direction without rotating
+        self.accelerate()
+        # Optionally, implement patrol or scanning patterns
+
+    def engage_behavior(self, delta_time, projectiles, ships):
+        """
+        Engage with the target.
+        """
+        if not self.target:
+            self.behavior = "idle"
+            return
+
+        # Aim at the target
+        direction_to_target = self.target.position - self.position
+        angle_to_target = pygame.math.Vector2(0, -1).angle_to(direction_to_target)
+        self.rotate_towards(angle_to_target)
+
+        # Accelerate towards the target if far away
+        if direction_to_target.length() > 100:  # Example range
+            self.accelerate()
+        else:
+            self.decelerate()
+
+        # Fire weapons
+        self.fire_weapon("primary", projectiles, angle_to_target, ships)
+        self.fire_weapon("secondary", projectiles, angle_to_target, ships)
+        self.fire_weapon("special", projectiles, angle_to_target, ships)
+
+
+    def evade_behavior(self, delta_time):
+        """
+        Evade behavior to avoid threats.
+        """
+        if not self.target:
+            self.behavior = "idle"
+            return
+
+        # Move in the opposite direction of the target
+        direction_away_from_target = self.position - self.target.position
+        angle_away = pygame.math.Vector2(0, -1).angle_to(direction_away_from_target)
+        self.rotate_towards(angle_away)
+        self.accelerate()
+
+    def rotate_towards(self, target_angle):
+        """
+        Rotate the ship towards the given angle.
+        """
+        angle_difference = (target_angle - self.angle) % 360
+        if angle_difference > 180:
+            angle_difference -= 360
+
+        if angle_difference > self.rotation_speed:
+            self.rotate_right()
+        elif angle_difference < -self.rotation_speed:
+            self.rotate_left()
+        else:
+            # If the difference is small, set angle directly to target_angle
+            self.angle = target_angle % 360
+            self.update_image()

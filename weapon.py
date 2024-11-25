@@ -40,7 +40,9 @@ class Weapon:
         self.turret_projectiles = turret_projectiles
         self.turret_spread = turret_spread
 
-    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships):
+    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships, ship=None):
+        if ship:
+            self.ship = ship
         if self.cooldown <= 0:
             if self.alternate_fire and self.alternate_offsets:
                 offset_vector = self.alternate_offsets[self.current_offset_idx]
@@ -211,7 +213,8 @@ class TrazerWeapon(Weapon):
         self.origin_race = None
         self.origin_relationship = None
 
-    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships):
+    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships, ship=None):
+        super().fire(position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships, ship=ship)
         self.is_firing = True  # Start firing state
         if len(self.attached_lasers) == 0:
             # On first fire, add multiple lasers
@@ -302,7 +305,8 @@ class TSpaceWeapon(Weapon):
         self.origin_race = None
         self.origin_relationship = None
 
-    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships):
+    def fire(self, position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships, ship=None):
+        super().fire(position, angle, projectiles, ship_velocity, origin_race, origin_relationship, ships, ship=ship)
         self.is_firing = True  # Start firing state
         if len(self.attached_lasers) == 0:
             # Find the closest enemy

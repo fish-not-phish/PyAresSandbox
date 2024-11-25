@@ -27,10 +27,10 @@ class Level:
                         {"type": "hvd", "x": 200, "y": 150},
                     ]
                 },
-                "ish": {
+                "gai": {
                     "relationship": "foe",
                     "ships": [
-                        {"type": "hvd", "x": 400, "y": 300},
+                        {"type": "gunship", "x": 400, "y": 300},
                     ]
                 },
             },

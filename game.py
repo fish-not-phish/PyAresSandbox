@@ -1,4 +1,4 @@
-from ship import Ship
+from ship import Ship, NonPlayerShip
 from level import Level
 from grid import draw_grid
 from utils import *
@@ -226,35 +226,50 @@ current_level = Level(1)  # Load level 1
 
 # Load ships for the level
 ships = []
-for ship_config in current_level.ships:
+
+# Load ships for the level
+ships = []
+for i, ship_config in enumerate(current_level.ships):
     race = ship_config["race"]
     ship_type = ship_config["type"]
     weapon_data = ship_config["weapons"]
     relationship = ship_config["relationship"]
+    x = ship_config.get("x", SCREEN_WIDTH // 2)
+    y = ship_config.get("y", SCREEN_HEIGHT // 2)
 
     # Load ship assets
     sprite_sheet, frames = load_ship_assets(BASE_ASSETS_PATH, race, ship_type)
 
-    # Use the position from the ship configuration
-    x = ship_config.get("x", SCREEN_WIDTH // 2)
-    y = ship_config.get("y", SCREEN_HEIGHT // 2)
-
     # Add sound_manager to ship_config
     ship_config["sound_manager"] = sound_manager
 
-    # Create the ship
-    ship = Ship(
-        race=race,
-        relationship=relationship,
-        x=x,
-        y=y,
-        frames=frames,
-        ship_sheet=sprite_sheet,
-        screen_width=SCREEN_WIDTH,
-        screen_height=SCREEN_HEIGHT,
-        config=ship_config,  # Pass the entire ship configuration
-        particles_group=particles,
-    )
+    if i == 0:  # Player ship
+        ship = Ship(
+            race=race,
+            relationship=relationship,
+            x=x,
+            y=y,
+            frames=frames,
+            ship_sheet=sprite_sheet,
+            screen_width=SCREEN_WIDTH,
+            screen_height=SCREEN_HEIGHT,
+            config=ship_config,
+            particles_group=particles,
+        )
+    else:  # Non-player ship
+        ship = NonPlayerShip(
+            race=race,
+            relationship=relationship,
+            x=x,
+            y=y,
+            frames=frames,
+            ship_sheet=sprite_sheet,
+            screen_width=SCREEN_WIDTH,
+            screen_height=SCREEN_HEIGHT,
+            config=ship_config,
+            particles_group=particles,
+        )
+
     ships.append(ship)
 
 # Projectile group
@@ -334,6 +349,9 @@ while running:
 
     # Update game state
     for ship in ships:
+        if isinstance(ship, NonPlayerShip):  # Check if it's an AI-controlled ship
+            ship.think(delta_time, ships, projectiles)  # Pass 'projectiles' here
+
         ship.update_position(delta_time)
         ship.update_weapons(delta_time, ships, projectiles)
 
