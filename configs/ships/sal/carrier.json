@@ -30,7 +30,7 @@
             "lifetime": 2,
             "size": 1.0,
             "damage": 10,
-            "fire_rate": 3,
+            "fire_rate": 30,
             "laser_color": [230, 226, 14],
             "laser_length":200,
             "laser_width": 1,

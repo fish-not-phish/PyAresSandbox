@@ -321,7 +321,7 @@ class TSpaceWeapon(Weapon):
             # Create a single LightningLaser aimed towards firing_angle with dynamic length
             laser = LightningLaser(
                 offset_angle=firing_angle,
-                distance=35,  # Distance from the ship
+                distance=distance / 2 if closest_enemy else self.laser_length / 2,  # Distance from the ship
                 laser_angle=firing_angle,
                 length=distance if closest_enemy else self.laser_length,  # Dynamic length
                 width=self.laser_width,
